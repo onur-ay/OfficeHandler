@@ -2,14 +2,21 @@ package Model;
 
 public class FileType {
 
-    public int ID;
+    private int ID;
+    private String Name;
+
+    public FileType(){
+
+    }
+
+    public FileType(String name) {
+        Name = name;
+    }
 
     public FileType(int ID, String name) {
         this.ID = ID;
         Name = name;
     }
-
-    public String Name;
 
     public int getID() {
         return ID;

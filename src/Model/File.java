@@ -1,29 +1,23 @@
 package Model;
 
-import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class File {
-    public int ID;
+    private int ID;
+    private String Name;
+    private FileType FileType;
+    private String Author;
+    private String Directory;
+    private Date CreationDate;
+    private double Size;
+    private boolean Fav;
 
-    public File(int ID, String name, Model.FileType fileType) {
+    public File(int ID, String name, FileType fileType) {
         this.ID = ID;
         Name = name;
         FileType = fileType;
     }
-
-    public String Name;
-
-    public FileType FileType;
-
-    public String Author;
-
-    public String Directory;
-
-    public Date Date;
-
-    public double Size;
-
-    public boolean IsFav;
 
     public int getID() {
         return ID;
@@ -41,7 +35,11 @@ public class File {
         Name = name;
     }
 
-    public FileType getFileType() {
+    public String getFileType() {
+        return FileType.getName();
+    }
+
+    public FileType getFileTypeObject() {
         return FileType;
     }
 
@@ -65,12 +63,17 @@ public class File {
         Directory = directory;
     }
 
-    public java.sql.Date getDate() {
-        return Date;
+    public String getCreationDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(CreationDate);
     }
 
-    public void setDate(java.sql.Date date) {
-        Date = date;
+    public Date getCreationDateObject() {
+        return CreationDate;
+    }
+
+    public void setCreationDate(Date date) {
+        CreationDate = date;
     }
 
     public double getSize() {
@@ -81,11 +84,11 @@ public class File {
         Size = size;
     }
 
-    public boolean isFav() {
-        return IsFav;
+    public boolean getFav() {
+        return Fav;
     }
 
     public void setFav(boolean fav) {
-        IsFav = fav;
+        Fav = fav;
     }
 }

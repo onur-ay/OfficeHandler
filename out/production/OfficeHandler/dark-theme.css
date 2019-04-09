@@ -12,7 +12,7 @@
 }
 
 
-/* ROOT*/
+/* ROOT */
 .root{
     -fx-background-color: -fx-first;
 }
@@ -23,6 +23,13 @@
     -fx-text-fill : -fx-first-text;
 }
 
+/* TEXT FIELD */
+.text-field {
+    -fx-background-color: -fx-first;
+    -fx-border-color: -fx-second;
+    -fx-border-radius: 20px;
+    -fx-text-fill: -fx-first-text;
+}
 
 /* COMBO-BOX */
 .combo-box{

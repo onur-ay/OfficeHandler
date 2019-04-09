@@ -6,9 +6,8 @@ public class Tag {
         Name = name;
     }
 
-    public int ID;
-
-    public String Name;
+    private int ID;
+    private String Name;
 
     public int getID() {
         return ID;

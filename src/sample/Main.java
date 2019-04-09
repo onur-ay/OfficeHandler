@@ -10,11 +10,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
-import java.sql.*;
-
-import API.GeneralOperations;
-
 public class Main extends Application {
 
     private double xOffset = 0.0;
@@ -46,35 +41,7 @@ public class Main extends Application {
         primaryStage.setTitle("Office Handler");
         primaryStage.setScene(myScene);
         primaryStage.show();
-
-        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/OfficeHandlerDB", "postgres", "Sher76796775ed.")) {
-
-
-            System.out.println("Java JDBC PostgreSQL Example");
-
-            System.out.println("Connected to PostgreSQL database!");
-
-            Statement statement = connection.createStatement();
-
-            System.out.println("Reading car records...");
-
-            System.out.printf("%-30.30s  %-30.30s%n", "ID", "Name");
-
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + GeneralOperations.GetTableName("OFFICE","FileType"));
-            while (resultSet.next()) {
-                System.out.printf("%-30.30s  %-30.30s%n", resultSet.getString("ID"), resultSet.getString("NAME"));
-            }
-
-        } /*catch (ClassNotFoundException e) {
-            System.out.println("PostgreSQL JDBC driver not found.");
-            e.printStackTrace();
-        }*/ catch (SQLException e) {
-            System.out.println("Connection failure.");
-            e.printStackTrace();
-        }
-
     }
 
     public static void main(String[] args) { launch(args); }
-
 }
