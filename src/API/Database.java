@@ -13,7 +13,7 @@ public class Database {
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "Sher76796775ed.";
 
-    public static <T> void Insert( T Model ){
+    public static <T> void Insert(T Model){
         StringBuilder sqlQuery = new StringBuilder("INSERT INTO \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\"(\"");
         Field[] fields = Model.getClass().getDeclaredFields();
 
@@ -40,21 +40,59 @@ public class Database {
         sqlQuery.append(");");
 
         executeUpdate(sqlQuery);
+
+
     }
 
-    public static <T> ResultSet Select(T Model, @Nullable String[][] filters){
+    public static <T> void Update(T Model, String [][] updatedFields, String[][] conditions){
+        StringBuilder sqlQuery = new StringBuilder("UPDATE \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\" SET ");
+        for(String[] field : updatedFields){
+            sqlQuery.append("\"").append(field[1]).append("\"=");
+            if(field[0].equals("string"))
+                sqlQuery.append("'{").append(field[2]).append("}', ");
+            else
+                sqlQuery.append(field[2]).append(", ");
+        }
+        sqlQuery = new StringBuilder(sqlQuery.substring(0,sqlQuery.length()-2));
+
+        if(conditions == null)
+            sqlQuery.append(";");
+        else{
+            sqlQuery.append(" WHERE ");
+            for(String[] condition : conditions){
+                sqlQuery.append("\"").append(condition[1]).append("\"");
+                if(condition[3].equals("1"))
+                    sqlQuery.append("=");
+                else
+                    sqlQuery.append("<>");
+                if(condition[0].equals("string"))
+                    sqlQuery.append("'{").append(condition[2]).append("}' AND ");
+                else
+                    sqlQuery.append(condition[2]).append(" AND ");
+            }
+            sqlQuery = new StringBuilder(sqlQuery.substring(0, sqlQuery.length()-5)).append(";");
+        }
+
+        executeUpdate(sqlQuery);
+    }
+
+    public static <T> ResultSet Select(T Model, @Nullable String[][] conditions){
         StringBuilder sqlQuery = new StringBuilder("SELECT * FROM \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\"");
 
-        if(filters == null){
+        if(conditions == null){
             sqlQuery.append(";");
         }else{
             sqlQuery.append(" WHERE ");
-            for(String[] filter : filters){
-                sqlQuery.append("\"").append(filter[1]).append("\" = ");
-                if(filter[0].equals("string"))
-                    sqlQuery.append("'{").append(filter[2]).append("}' AND ");
+            for(String[] condition : conditions){
+                sqlQuery.append("\"").append(condition[1]).append("\"");
+                if(condition[3].equals("1"))
+                    sqlQuery.append(" = ");
                 else
-                    sqlQuery.append(filter[2]).append(" AND ");
+                    sqlQuery.append(" <> ");
+                if(condition[0].equals("string"))
+                    sqlQuery.append("'{").append(condition[2]).append("}' AND ");
+                else
+                    sqlQuery.append(condition[2]).append(" AND ");
             }
             sqlQuery = new StringBuilder(sqlQuery.substring(0, sqlQuery.length()-5)).append(";");
         }

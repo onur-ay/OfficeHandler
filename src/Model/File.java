@@ -1,5 +1,6 @@
 package Model;
 
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -8,15 +9,31 @@ public class File {
     private String Name;
     private FileType FileType;
     private String Author;
-    private String Directory;
+    private Path Directory;
     private Date CreationDate;
+    private Date LastModifiedDate;
     private double Size;
     private boolean Fav;
+
+    public File(){
+
+    }
 
     public File(int ID, String name, FileType fileType) {
         this.ID = ID;
         Name = name;
         FileType = fileType;
+    }
+
+    public File(String name, Model.FileType fileType, String author, Path directory, Date creationDate, Date lastModifiedDate, double size, boolean fav) {
+        Name = name;
+        FileType = fileType;
+        Author = author;
+        Directory = directory;
+        CreationDate = creationDate;
+        LastModifiedDate = lastModifiedDate;
+        Size = size;
+        Fav = fav;
     }
 
     public int getID() {
@@ -56,10 +73,14 @@ public class File {
     }
 
     public String getDirectory() {
+        return Directory.toString().replace("\\","/");
+    }
+
+    public Path getDirectoryObject() {
         return Directory;
     }
 
-    public void setDirectory(String directory) {
+    public void setDirectory(Path directory) {
         Directory = directory;
     }
 
@@ -74,6 +95,19 @@ public class File {
 
     public void setCreationDate(Date date) {
         CreationDate = date;
+    }
+
+    public String getLastModifiedDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(LastModifiedDate);
+    }
+
+    public Date getLastModifiedDateObject() {
+        return LastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        LastModifiedDate = lastModifiedDate;
     }
 
     public double getSize() {
