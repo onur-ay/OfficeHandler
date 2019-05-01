@@ -1,38 +1,59 @@
 package Model;
 
+import Classes.Database;
+import Classes.Date;
+import Classes.Maths;
+import Main.Controller;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.Control;
+import javafx.scene.input.MouseEvent;
+
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class File {
-    private int ID;
+    private Integer ID;
     private String Name;
-    private FileType FileType;
+    private String FileType;
     private String Author;
     private Path Directory;
     private Date CreationDate;
     private Date LastModifiedDate;
-    private double Size;
-    private boolean Fav;
+    private Double Size;
+    private Integer Fav;
+    private Button DeleteButton;
 
     public File(){
 
     }
 
-    public File(int ID, String name, FileType fileType) {
+    public File(int ID, String name, String fileType) {
         this.ID = ID;
         Name = name;
         FileType = fileType;
     }
 
-    public File(String name, Model.FileType fileType, String author, Path directory, Date creationDate, Date lastModifiedDate, double size, boolean fav) {
+    public File(String name, String fileType, String author, Path directory, Date creationDate, Date lastModifiedDate, Double size, Integer fav) {
         Name = name;
         FileType = fileType;
         Author = author;
         Directory = directory;
         CreationDate = creationDate;
         LastModifiedDate = lastModifiedDate;
-        Size = size;
+        Size = Maths.round(size,2);
+        Fav = fav;
+    }
+
+    public File(Integer ID, String name, String fileType, String author, Path directory, Date creationDate, Date lastModifiedDate, Double size, Integer fav) {
+        this.ID = ID;
+        Name = name;
+        FileType = fileType;
+        Author = author;
+        Directory = directory;
+        CreationDate = creationDate;
+        LastModifiedDate = lastModifiedDate;
+        Size = Maths.round(size,2);
         Fav = fav;
     }
 
@@ -53,14 +74,10 @@ public class File {
     }
 
     public String getFileType() {
-        return FileType.getName();
-    }
-
-    public FileType getFileTypeObject() {
         return FileType;
     }
 
-    public void setFileType(FileType fileType) {
+    public void setFileType(String fileType) {
         FileType = fileType;
     }
 
@@ -118,11 +135,38 @@ public class File {
         Size = size;
     }
 
-    public boolean getFav() {
+    public Integer getFav() {
         return Fav;
     }
 
-    public void setFav(boolean fav) {
+    public void setFav(Integer fav) {
         Fav = fav;
+    }
+
+    public Button getDeleteButton() {
+        return DeleteButton;
+    }
+
+    private void setDeleteButton(Button deleteButton) {
+        DeleteButton = deleteButton;
+    }
+
+    public void createUndoFavButton() {
+        Button undoFav = new Button();
+        undoFav.setMinWidth(25);
+        undoFav.setMaxWidth(25);
+        undoFav.setMinHeight(25);
+        undoFav.setMaxHeight(25);
+        undoFav.setId("rowDeleteButton");
+        undoFav.setOnMouseClicked(event -> {
+            try {
+                this.setFav(0);
+                Database.Update(this);
+                Controller.tables.get("fav").getItems().remove(this);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
+        setDeleteButton(undoFav);
     }
 }
