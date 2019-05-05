@@ -3,21 +3,12 @@ package Classes;
 import com.sun.istack.internal.Nullable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Button;
-import jdk.nashorn.internal.runtime.regexp.RegExp;
-import jdk.nashorn.internal.runtime.regexp.RegExpFactory;
-import jdk.nashorn.internal.runtime.regexp.RegExpMatcher;
-import jdk.nashorn.internal.runtime.regexp.RegExpResult;
-import sun.misc.Regexp;
-
 import java.nio.file.Path;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.text.ParseException;
 
 public class Database {
 
@@ -56,7 +47,7 @@ public class Database {
         return executeUpdate(sqlQuery);
     }
 
-    public static <T> boolean Update(T Model, String [][] updatedFields, String[][] conditions){
+    /*public static <T> boolean Update(T Model, String [][] updatedFields, String[][] conditions){
         StringBuilder sqlQuery = new StringBuilder("UPDATE \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\" SET ");
         for(String[] field : updatedFields){
             sqlQuery.append("\"").append(field[1]).append("\"=");
@@ -86,7 +77,7 @@ public class Database {
         }
 
         return executeUpdate(sqlQuery);
-    }
+    }*/
 
     public static <T> boolean Update(T Model) throws IllegalAccessException {
         StringBuilder sqlQuery = new StringBuilder("UPDATE \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\" SET ");
@@ -114,7 +105,7 @@ public class Database {
         return executeUpdate(sqlQuery);
     }
 
-    public static <T> ObservableList<T> Select(T Model, @Nullable String[][] conditions) throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, ParseException {
+    public static <T> ObservableList<T> Select(T Model, @Nullable String[][] conditions) throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         StringBuilder sqlQuery = new StringBuilder("SELECT * FROM \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\"");
 
         if(conditions == null){

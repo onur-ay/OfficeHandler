@@ -275,6 +275,19 @@
     -fx-background-image: url('/resources/help-gray.png');
 }
 
+#analyzeButton{
+    -fx-background-image: url('/resources/analyze.png');
+    -fx-background-size: 20 20;
+    -fx-background-repeat: no-repeat;
+    -fx-background-insets: -5,5,5,5;
+    -fx-border-insets: -5,5,5,5;
+    -fx-background-position: left;
+}
+
+#analyzeButton:hover{
+    -fx-background-image: url('/resources/analyze-gray.png');
+}
+
 #clearFiltersButton{
     -fx-background-image: url('/resources/filter.png');
     -fx-background-size: 20 20;

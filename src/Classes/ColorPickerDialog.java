@@ -3,40 +3,25 @@ package Classes;
 import Main.Controller;
 import javafx.geometry.*;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.controlsfx.control.spreadsheet.Grid;
-
-import java.awt.*;
 
 public class ColorPickerDialog {
 
     private String backgroundColorHex;
     private String borderColorHex;
     private String textColorHex;
-    private Label backgroundColor;
-    private Label borderColor;
-    private Label textColor;
     private ColorPicker backgroundPicker;
     private ColorPicker borderPicker;
     private ColorPicker textPicker;
-    private Button closeButton;
-    private Button confirmButton;
-    private Button resetButton;
     private GridPane layout;
     private Stage dialog;
 
@@ -44,24 +29,12 @@ public class ColorPickerDialog {
         return backgroundColorHex;
     }
 
-    public void setBackgroundColorHex(String backgroundColorHex) {
-        this.backgroundColorHex = backgroundColorHex;
-    }
-
     public String getBorderColorHex() {
         return borderColorHex;
     }
 
-    public void setBorderColorHex(String borderColorHex) {
-        this.borderColorHex = borderColorHex;
-    }
-
     public String getTextColorHex() {
         return textColorHex;
-    }
-
-    public void setTextColorHex(String textColorHex) {
-        this.textColorHex = textColorHex;
     }
 
     public ColorPickerDialog(MouseEvent event, String currentBackground, String currentBorder, String currentText) {
@@ -125,9 +98,9 @@ public class ColorPickerDialog {
         Label dod1 = new Label(":");
         Label dod2 = new Label(":");
         Label dod3 = new Label(":");
-        backgroundColor = new Label("Background Color");
-        borderColor = new Label("Border Color");
-        textColor = new Label("Text Color");
+        Label backgroundColor = new Label("Background Color");
+        Label borderColor = new Label("Border Color");
+        Label textColor = new Label("Text Color");
         dod1.setStyle(textStyle);
         dod2.setStyle(textStyle);
         dod3.setStyle(textStyle);
@@ -159,13 +132,13 @@ public class ColorPickerDialog {
     private void setButtons(){
         String buttonStyle = "-fx-border-color:" + Controller.SECOND_COLOR + "; -fx-border-radius: 20px; -fx-background-radius: 20px; -fx-background-color:" + Controller.FIRST_COLOR + "; -fx-text-fill: " + Controller.FIRST_TEXT_COLOR + ";";
         String buttonStyleHover = "-fx-cursor: hand; -fx-border-radius: 20px; -fx-background-radius: 20px; -fx-background-color:" + Controller.SECOND_COLOR + "; -fx-text-fill: " + Controller.FIRST_COLOR + ";";
-        confirmButton = new Button("Confirm");
+        Button confirmButton = new Button("Confirm");
         confirmButton.setId("confirmColorsButton");
         confirmButton.setOnMouseClicked((MouseEvent event) -> { backgroundColorHex = colorToHex(backgroundPicker.getValue()); borderColorHex = colorToHex(borderPicker.getValue()); textColorHex = colorToHex(textPicker.getValue()); dialog.close();});
-        resetButton = new Button("Reset");
+        Button resetButton = new Button("Reset");
         resetButton.setId("resetColorsButton");
         resetButton.setOnMouseClicked((MouseEvent event) -> { backgroundPicker.setValue(Color.web("#2D2D2D")); borderPicker.setValue(Color.web("#FFFF8D")); textPicker.setValue(Color.web("#B2B2B2")); });
-        closeButton = new Button();
+        Button closeButton = new Button();
         closeButton.setId("cancelColorsButton");
         closeButton.setMinWidth(25);
         closeButton.setMaxWidth(25);

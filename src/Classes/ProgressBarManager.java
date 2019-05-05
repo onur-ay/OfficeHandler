@@ -1,12 +1,9 @@
 package Classes;
 
-import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-
-import javax.naming.Binding;
 
 public class ProgressBarManager {
 
@@ -14,15 +11,9 @@ public class ProgressBarManager {
     private DoubleProperty totalWorkLoad = new SimpleDoubleProperty();
     private DoubleProperty progress = new SimpleDoubleProperty();
     private StringProperty progressText = new SimpleStringProperty();
-    private DoubleProperty progressPercentage = new SimpleDoubleProperty();
-    private int count=0;
 
     public double getWorkFinished() {
         return workFinished.get();
-    }
-
-    public double getProgressPercentage(){
-        return workFinished.get()*100;
     }
 
     public DoubleProperty workFinishedProperty() {
@@ -62,28 +53,8 @@ public class ProgressBarManager {
         return progressText.get();
     }
 
-    public StringProperty progressTextProperty() {
-        return progressText;
-    }
-
-    public void setProgressText(String progressText) {
+    private void setProgressText(String progressText) {
         this.progressText.set(progressText);
-    }
-
-    public DoubleProperty progressPercentageProperty() {
-        return progressPercentage;
-    }
-
-    public void setProgressPercentage(double workFinishedPercentage) {
-        this.progressPercentage.set(workFinishedPercentage);
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public ProgressBarManager(double workFinished, double totalWorkLoad, double progress, double progressText) {

@@ -20,10 +20,6 @@ public class Main extends Application {
         return primaryStage;
     }
 
-    public void setPrimaryStage(Stage primaryStage) {
-        Main.primaryStage = primaryStage;
-    }
-
     @Override
     public void start(Stage stage) throws Exception{
         primaryStage = stage;

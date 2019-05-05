@@ -3,21 +3,13 @@ package Main;
 import Classes.*;
 import Classes.Date;
 import Model.FileType;
-import com.sun.javafx.css.Size;
 import com.sun.javafx.scene.control.skin.TableHeaderRow;
 import javafx.application.Platform;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -28,14 +20,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.controlsfx.control.spreadsheet.Grid;
-
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.io.File;
@@ -50,35 +38,35 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static Classes.Constants.*;
+
 /**
  *  DEFAULT OLAN FİLETYPE'LAR SETUP ESNASINDA DB'YE BASILACAK VERİTABANINDAN SİLMEYİ UNUTMA, FİLETYPE'LARI DB'YE BASMAYI UNUTMA !
- *  BFS İLE DE TARAMA YAPIP DFS İLE BFS İ KARŞILAŞTIRMAYI UNUTMA !
  *
  */
 
 public class Controller implements Initializable {
 
-    private static final int DOUBLE_CLICK = 2;
     private static boolean MAXIMIZED = false;
-
     private static double PREVIOUS_HEIGHT;
     private static double PREVIOUS_WIDTH;
-
     public static String FIRST_COLOR = "#2D2D2D";
     public static String SECOND_COLOR = "#FFFF8D";
     public static String FIRST_TEXT_COLOR = "#B2B2B2";
+    private static boolean ALGORITHM = BFS;
 
     @FXML
     public ComboBox<String> driveComboBox;
     public ComboBox<String> fileTypeComboBox;
+    public ComboBox<String> algorithmComboBox;
     public TabPane tabs;
     public Button maximizeButton;
     public Button scanDrivesButton;
     public Button scanTablesButton;
+    public Button analyzeButton;
     public CheckBox matchCaseCheck;
     public TextField keywordText;
     public Label totalFilesLabel;
@@ -95,17 +83,37 @@ public class Controller implements Initializable {
     public GridPane innerGridPane = new GridPane();
     public ProgressIndicator scanDrivesLoading = new ProgressIndicator();
     public ProgressIndicator scanTablesLoading = new ProgressIndicator();
+    public ProgressIndicator analyzeLoading = new ProgressIndicator();
     public ProgressBar progressBar = new ProgressBar();
+
+
     public ProgressBarManager pbm = new ProgressBarManager(0.0, 0.0, 0.0, 0.0);
     private HashMap<String, FileType> fileTypes = new HashMap<>();
     private HashMap<String, String> drives = new HashMap<>();
     public static HashMap<String, TableView<Model.File>> tables = new HashMap<>();
     private IntegerProperty threadPoolFinishedListener = new SimpleIntegerProperty();
+    private IntegerProperty threadPoolFinishedListenerBFS = new SimpleIntegerProperty();
     private Text indicator = new Text();
+    private ArrayList<FileSystemSearch> searches;
+    private ArrayList<FileSystemSearch> searchesBFS;
+    private ArrayList<String> extensionsFilter;
+    private ArrayList<File> directoriesFilter;
+    private String keywordFilter;
+    private int matchCaseFilter;
+    private long DFSstartTime;
+    private long DFSendTime;
+    private long BFSstartTime;
+    private long BFSendTime;
+    private long DFSworkTime;
+    private long BFSworkTime;
 
     @Override
     public void initialize(URL location, ResourceBundle resources){
         try {
+            matchCaseCheck.setDisable(true);
+            keywordText.textProperty().addListener((observable, oldValue, newValue) -> matchCaseCheck.setDisable(newValue.equals("")));
+            algorithmComboBox.getItems().addAll("DFS", "BFS");
+            algorithmComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> ALGORITHM = newValue.equals("DFS") ? DFS : BFS);
             ScanAndSetDrives();
             SetFileTypes();
             InitializeTables();
@@ -117,7 +125,51 @@ public class Controller implements Initializable {
             progressBar.progressProperty().bind(pbm.progressProperty());
             pbm.totalWorkLoadProperty().addListener(e -> Platform.runLater(() -> totalFilesNumber.setText(String.format("%,.0f", pbm.getTotalWorkLoad()))));
             pbm.workFinishedProperty().addListener(e -> Platform.runLater(() -> {filesDoneNumber.setText(String.format("%,.0f",pbm.getWorkFinished())); indicator.setText(pbm.getProgressText());}));
-        } catch (SQLException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException | ParseException e) {
+            threadPoolFinishedListener.addListener((observable, oldValue, newValue) -> {
+                if(newValue.intValue() == searches.size()){
+                    if(DFSstartTime != 0){
+                        DFSworkTime = DFSendTime - DFSstartTime;
+                        totalFilesLabel.setVisible(true);
+                        totalFilesLabel.setText("DFS Duration: ");
+                        totalFilesNumber.setVisible(true);
+                        totalFilesNumber.setText(String.format("%02d:%02d:%02d",((DFSworkTime/1000)/60)/60,(DFSworkTime/1000)/60,(DFSworkTime/1000)%60));
+                        if(threadPoolFinishedListenerBFS.intValue() == searchesBFS.size()){
+                            ResetAnalyzeInfo();
+                            pbm.setProgress(0);
+                            threadPoolFinishedListener.set(0);
+                            scanTablesButton.setDisable(false);
+                            scanDrivesButton.setDisable(false);
+                            analyzeButton.setDisable(false);
+                            analyzeLoading.setVisible(false);
+                        }
+                        DFSstartTime = 0;
+                    }else{
+                        new CustomizedDialog("Office Handler", "Scan is completed successfully !", "/resources/desktop-icon.png", Main.getPrimaryStage(), true);
+                        resetProgressBar(false);
+                        threadPoolFinishedListener.set(0);
+                    }
+                }
+            });
+            threadPoolFinishedListenerBFS.addListener((observable, oldValue, newValue) -> {
+                if(BFSstartTime != 0 && newValue.intValue() == searchesBFS.size()){
+                    BFSworkTime = BFSendTime - BFSstartTime;
+                    filesDoneLabel.setVisible(true);
+                    filesDoneLabel.setText("BFS Duration: ");
+                    filesDoneNumber.setVisible(true);
+                    filesDoneNumber.setText(String.format("%02d:%02d:%02d",((BFSworkTime/1000)/60)/60,(BFSworkTime/1000)/60,(BFSworkTime/1000)%60));
+                    if(threadPoolFinishedListener.intValue() == searchesBFS.size()){
+                        ResetAnalyzeInfo();
+                        pbm.setProgress(0);
+                        BFSstartTime = 0;
+                        threadPoolFinishedListenerBFS.set(0);
+                        scanTablesButton.setDisable(false);
+                        scanDrivesButton.setDisable(false);
+                        analyzeButton.setDisable(false);
+                        analyzeLoading.setVisible(false);
+                    }
+                }
+            });
+        } catch (SQLException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }
@@ -165,7 +217,7 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void scanTables() throws IllegalAccessException, InvocationTargetException, ParseException, InstantiationException, SQLException, NoSuchMethodException {
+    private void scanTables() throws IllegalAccessException, InvocationTargetException, InstantiationException, SQLException, NoSuchMethodException {
         String drive = driveComboBox.getSelectionModel().getSelectedItem();
         String fileType = fileTypeComboBox.getSelectionModel().getSelectedItem();
         String keyword = keywordText.getText();
@@ -207,50 +259,70 @@ public class Controller implements Initializable {
 
     @FXML
     private void scanDrives(){
-        ArrayList<FileSystemSearch> searches = new ArrayList<>();
+        searches = new ArrayList<>();
         ArrayList<FileCount> fileCounts = new ArrayList<>();
-        ArrayList<String> extensions = new ArrayList<>();
-        String keyword = keywordText.getText();
-        ArrayList<File> directories = new ArrayList<>();
 
-        if(driveComboBox.getSelectionModel().getSelectedItem() == null || driveComboBox.getSelectionModel().getSelectedItem().equals("All"))
-            for(String drive : drives.values())
-                directories.add(new File(drive));
-        else
-            directories.add(new File(driveComboBox.getSelectionModel().getSelectedItem()));
+        getFilters();
 
-        if(fileTypeComboBox.getSelectionModel().getSelectedItem() == null || fileTypeComboBox.getSelectionModel().getSelectedItem().equals("All"))
-            for(FileType fileType : fileTypes.values())
-                extensions.add(fileType.getName());
-        else
-            extensions.add(fileTypeComboBox.getSelectionModel().getSelectedItem());
-
-        for(File directory : directories){
-            FileSystemSearch filteredSearch = new FileSystemSearch(directory, directory, keyword, this, extensions,true);
-            filteredSearch.setIsMatchCase(matchCaseCheck.isSelected() ? 1 : 0);
+        for(File directory : directoriesFilter){
+            FileSystemSearch filteredSearch = new FileSystemSearch(directory, directory, keywordFilter, this, extensionsFilter, ALGORITHM, CREATEFILE);
+            filteredSearch.setIsMatchCase(matchCaseFilter);
             filteredSearch.setOnSucceeded(event -> threadPoolFinishedListener.set(threadPoolFinishedListener.get() + 1));
-            FileCount countFiles = new FileCount(directory, directory, this);
+            FileCount countFiles = new FileCount(directory, directory, this, ALGORITHM);
             searches.add(filteredSearch);
             fileCounts.add(countFiles);
         }
 
-        threadPoolFinishedListener.addListener((observable, oldValue, newValue) -> {
-            if(newValue.intValue() == searches.size()){
-                new CustomizedDialog("Office Handler", "Scan is completed successfully !", "/resources/desktop-icon.png", Main.getPrimaryStage(), true);
-                resetProgressBar(false);
-                threadPoolFinishedListener.set(0);
-            }
-        });
-
         setProgressBar(false);
-        for(FileCount countTask : fileCounts)
-            new Thread(countTask).start();
-        ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(fileCounts.size());
-        for(FileSystemSearch filteredSearch : searches){
-            threadPool.schedule(filteredSearch,20, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(searches.size());
+        for(int i=0; i<searches.size(); i++){
+            new Thread(fileCounts.get(i)).start();
+            threadPool.schedule(searches.get(i),20, TimeUnit.SECONDS);
         }
 
         clearFilters();
+    }
+
+    @FXML
+    private void analyzeAlgorithms(){
+        searches = new ArrayList<>();
+        searchesBFS = new ArrayList<>();
+        extensionsFilter = new ArrayList<>();
+
+        for(FileType extension : fileTypes.values())
+            extensionsFilter.add(extension.getName());
+
+        keywordFilter = keywordText.getText();
+        DFSstartTime = 0;
+        DFSendTime = 0;
+        DFSworkTime = 0;
+        BFSstartTime = 0;
+        BFSendTime = 0;
+        BFSworkTime = 0;
+
+        for(String directory : drives.values()){
+            FileSystemSearch filteredDFSSearch = new FileSystemSearch(new File(directory), new File(directory), keywordFilter, this, extensionsFilter, DFS, DONTCREATEFILE);
+            FileSystemSearch filteredBFSSearch = new FileSystemSearch(new File(directory), new File(directory), keywordFilter, this, extensionsFilter, BFS, DONTCREATEFILE);
+            filteredDFSSearch.setIsMatchCase(matchCaseFilter);
+            filteredBFSSearch.setIsMatchCase(matchCaseFilter);
+            filteredDFSSearch.setOnSucceeded(event -> { long now = System.currentTimeMillis(); DFSendTime = DFSendTime < now ? now : DFSendTime; threadPoolFinishedListener.set(threadPoolFinishedListener.get() + 1); });
+            filteredBFSSearch.setOnSucceeded(event -> { long now = System.currentTimeMillis(); BFSendTime = BFSendTime < now ? now : BFSendTime; threadPoolFinishedListenerBFS.set(threadPoolFinishedListenerBFS.get() + 1); });
+            searches.add(filteredDFSSearch);
+            searchesBFS.add(filteredBFSSearch);
+        }
+
+        pbm.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+        scanTablesButton.setDisable(true);
+        scanDrivesButton.setDisable(true);
+        analyzeButton.setDisable(true);
+        analyzeLoading.setVisible(true);
+        DFSstartTime = System.currentTimeMillis();
+        for(FileSystemSearch filteredDFSSearch : searches)
+            new Thread(filteredDFSSearch).start();
+
+        BFSstartTime = System.currentTimeMillis();
+        for(FileSystemSearch filteredBFSSearch : searchesBFS)
+            new Thread(filteredBFSSearch).start();
     }
 
     @FXML
@@ -275,10 +347,13 @@ public class Controller implements Initializable {
         if(selectedFile != null){
             if(selectedFile.getFav()== 0){
                 selectedFile.setFav(1);
-                Database.Update(selectedFile);
-                selectedFile.createUndoFavButton();
-                favTable.getItems().add(selectedFile);
-                new CustomizedDialog("Office Handler", "Selected file is added to the Favorites !", "/resources/confirmbox.png", Main.getPrimaryStage(), false);
+                if(!Database.Update(selectedFile)){
+                    System.out.println("The file you tried to update does not exist in DB !");
+                    selectedFile.createUndoFavButton();
+                    favTable.getItems().add(selectedFile);
+                    new CustomizedDialog("Office Handler", "Selected file is added to the Favorites !", "/resources/confirmbox.png", Main.getPrimaryStage(), false);
+                } else
+                    selectedFile.setFav(0);
             }
             else
                 new CustomizedDialog("Office Handler", "You can not add a file which has already exist in the Favorites !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
@@ -287,7 +362,7 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void clearFiltersLoadAgain() throws IllegalAccessException, ParseException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
+    private void clearFiltersLoadAgain() throws IllegalAccessException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
         if(pbm.getProgress()==0.0){
             clearFilters();
             if(!scanDrivesButton.isDisabled())
@@ -300,6 +375,25 @@ public class Controller implements Initializable {
         new CustomizedDialog("Office Handler", "This program was created in the scope of term project of Yildiz Technical University Computer Engineering Department. All rights are reserved by YTU CE. Mustafa ULUKAYA | Onur AY | 2019®", "/resources/desktop-icon.png", Main.getPrimaryStage(), false);
     }
 
+    private void getFilters(){
+        extensionsFilter = new ArrayList<>();
+        keywordFilter = keywordText.getText();
+        directoriesFilter = new ArrayList<>();
+        matchCaseFilter = matchCaseCheck.isSelected() ? 1 : 0;
+
+        if(driveComboBox.getSelectionModel().getSelectedItem() == null || driveComboBox.getSelectionModel().getSelectedItem().equals("All"))
+            for(String drive : drives.values())
+                directoriesFilter.add(new File(drive));
+        else
+            directoriesFilter.add(new File(driveComboBox.getSelectionModel().getSelectedItem()));
+
+        if(fileTypeComboBox.getSelectionModel().getSelectedItem() == null || fileTypeComboBox.getSelectionModel().getSelectedItem().equals("All"))
+            for(FileType fileType : fileTypes.values())
+                extensionsFilter.add(fileType.getName());
+        else
+            extensionsFilter.add(fileTypeComboBox.getSelectionModel().getSelectedItem());
+    }
+
     private void clearFilters() {
         if(driveComboBox.getSelectionModel().getSelectedItem() != null && driveComboBox.getSelectionModel().getSelectedItem().length() > 3)
             driveComboBox.getItems().remove(driveComboBox.getSelectionModel().getSelectedItem());
@@ -309,14 +403,14 @@ public class Controller implements Initializable {
         matchCaseCheck.setSelected(false);
     }
 
-    private void LoadDataFromDB() throws SQLException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, ParseException {
+    private void LoadDataFromDB() throws SQLException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         ObservableList<Model.File> files = Database.Select(new Model.File(), null);
         if(files!=null)
             for(Model.File file : files)
                 putToTable(file);
     }
 
-    private void SetFileTypes() throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, ParseException {
+    private void SetFileTypes() throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         ObservableList<Model.FileType> result = Database.Select(new FileType(), null);
         fileTypeComboBox.getItems().add("All");
         if(result != null){
@@ -428,6 +522,7 @@ public class Controller implements Initializable {
         }
         scanDrivesButton.setDisable(true);
         scanTablesButton.setDisable(true);
+        analyzeButton.setDisable(true);
         indicator.setVisible(true);
     }
 
@@ -443,6 +538,7 @@ public class Controller implements Initializable {
         }
         scanDrivesButton.setDisable(false);
         scanTablesButton.setDisable(false);
+        analyzeButton.setDisable(false);
         pbm.setTotalWorkLoad(0.0);
         pbm.setWorkFinished(0.0);
         pbm.setProgress(0.0);
@@ -530,7 +626,8 @@ public class Controller implements Initializable {
                             if(openFile.exists())
                                 Desktop.getDesktop().open(openFile);
                             else{
-                                Database.Delete(selectedFile);
+                                if(!Database.Delete(selectedFile))
+                                    System.out.println("The file you tried to delete does not exist in DB !");
                                 tables.get(selectedFile.getFileType()).getItems().remove(selectedFile);
                                 new CustomizedDialog("Office Handler", "File not found. The file you are trying to open may be deleted or moved.", "/resources/alertbox.png", Main.getPrimaryStage(), false);
                             }
@@ -553,5 +650,17 @@ public class Controller implements Initializable {
                 oldValue.getDeleteButton().setId("rowDeleteButton");
             newValue.getDeleteButton().setId("selectedRowDeleteButton");
         });
+    }
+
+    private void ResetAnalyzeInfo(){
+        new CustomizedDialog("Office Handler", "Analyze is finished, results are on the left of screen !", "/resources/confirmbox.png", Main.getPrimaryStage(), true);
+        filesDoneLabel.setVisible(false);
+        filesDoneNumber.setVisible(false);
+        totalFilesLabel.setVisible(false);
+        totalFilesNumber.setVisible(false);
+        totalFilesLabel.setText("Total Files: ");
+        totalFilesNumber.setText("");
+        filesDoneLabel.setText("Files Done: ");
+        filesDoneNumber.setText("");
     }
 }

@@ -1,7 +1,6 @@
 package Classes;
 
 import Main.Controller;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -50,46 +49,46 @@ public class CustomizedDialog {
         this.result = result;
     }
 
-    public String getTitleText() {
+    private String getTitleText() {
         return titleText;
     }
 
-    public void setTitleText(String titleText) {
+    private void setTitleText(String titleText) {
         this.titleText = titleText;
     }
 
-    public String getHeaderText() {
+    private String getHeaderText() {
         return headerText;
     }
 
-    public void setHeaderText(String headerText) {
+    private void setHeaderText(String headerText) {
         this.headerText = headerText;
     }
 
-    public String getImageFile() {
+    private String getImageFile() {
         return imageFile;
     }
 
-    public void setImageFile(String imageFile) {
+    private void setImageFile(String imageFile) {
         this.imageFile = imageFile;
     }
 
-    public String getContentText() {
+    private String getContentText() {
         return contentText;
     }
 
-    public void setContentText(String contentText) {
+    private void setContentText(String contentText) {
         this.contentText = contentText;
     }
 
     public CustomizedDialog(String titleText, String headerText, String imageFile, Stage mainStage, Boolean wait) {
-        this.titleText = titleText;
-        this.headerText = headerText;
-        this.imageFile = imageFile;
+        setTitleText(titleText);
+        setHeaderText(headerText);
+        setImageFile(imageFile);
 
         initializeDialog();
-        setTitleBar(titleText, imageFile);
-        setHeader(headerText);
+        setTitleBar(getTitleText(), getImageFile());
+        setHeader(getHeaderText());
 
         confirmButton = new Button("OK");
         confirmButton.setOnAction(e -> dialog.close());
@@ -102,15 +101,15 @@ public class CustomizedDialog {
     }
 
     public CustomizedDialog(String titleText, String headerText, String imageFile, String contentText, Stage mainStage, Boolean wait) {
-        this.titleText = titleText;
-        this.headerText = headerText;
-        this.imageFile = imageFile;
-        this.contentText = contentText;
+        setTitleText(titleText);
+        setHeaderText(headerText);
+        setImageFile(imageFile);
+        setContentText(contentText);
 
         initializeDialog();
         setTitleBar(titleText, imageFile);
         setHeader(headerText);
-        setInputField(contentText);
+        setInputField(getContentText());
 
         confirmButton = new Button("OK");
         confirmButton.setOnAction(e -> {setResult(input.getText()); dialog.close();});
