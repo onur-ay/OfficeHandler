@@ -6,26 +6,8 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="BFS hariç tamamlandı.">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/Onur_Ay.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Classes/Constants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/resources/analyze-gray.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/resources/analyze.png" afterDir="false" />
+    <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="Finitto Perfecto Italiano !">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/ColorPickerDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/ColorPickerDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/CustomizedDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/CustomizedDialog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/Database.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/FileCount.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/FileCount.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/FileSystemSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/FileSystemSearch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/ProgressBarManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Classes/ProgressBarManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Classes/ProgressIndicatorBar.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main/Design.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/Design.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/File.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/File.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/FileType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/FileType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/styles/dark-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/dark-theme.css" afterDir="false" />
     </list>
     <ignored path="JavaFxApplication.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -101,39 +83,7 @@
     <favorites_list name="JavaFxApplication" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Model/File.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="489">
-              <caret line="106" column="31" selection-start-line="106" selection-start-column="31" selection-end-line="106" selection-end-column="31" />
-              <folding>
-                <element signature="method#File#0;class#File#0" />
-                <element signature="method#File#1;class#File#0" />
-                <element signature="method#File#2;class#File#0" />
-                <element signature="method#File#3;class#File#0" />
-                <element signature="e#2015#2016#0" expanded="true" />
-                <element signature="e#2050#2051#0" expanded="true" />
-                <element signature="e#2104#2105#0" expanded="true" />
-                <element signature="e#2147#2148#0" expanded="true" />
-                <element signature="e#2188#2189#0" expanded="true" />
-                <element signature="e#2227#2228#0" expanded="true" />
-                <element signature="e#2289#2290#0" expanded="true" />
-                <element signature="e#2340#2341#0" expanded="true" />
-                <element signature="e#2371#2372#0" expanded="true" />
-                <element signature="e#2398#2399#0" expanded="true" />
-                <element signature="e#2438#2439#0" expanded="true" />
-                <element signature="e#2465#2466#0" expanded="true" />
-                <element signature="e#2527#2528#0" expanded="true" />
-                <element signature="e#2571#2572#0" expanded="true" />
-                <element signature="e#2602#2603#0" expanded="true" />
-                <element signature="method#createUndoFavButton#0;class#File#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -522,7 +472,7 @@
       <workItem from="1556409187991" duration="57276000" />
       <workItem from="1556718051569" duration="24229000" />
       <workItem from="1556808582956" duration="2014000" />
-      <workItem from="1557065531385" duration="24876000" />
+      <workItem from="1557065531385" duration="25005000" />
     </task>
     <task id="LOCAL-00001" summary="DB'den FileType okuma ve yeni eklenen FileType'ı DB'ye basma özelliği eklendi.">
       <created>1554848316540</created>
@@ -545,11 +495,18 @@
       <option name="project" value="LOCAL" />
       <updated>1556745437867</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Finitto Perfecto Italiano !">
+      <created>1557093536297</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1557093536297</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="536381000" />
+    <option name="totallyTimeSpent" value="536510000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -562,9 +519,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-1928" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.6703755" visible="true" weight="0.114072494" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.6703755" visible="true" weight="0.114072494" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" />
       <window_info id="Designer" order="3" />
@@ -573,7 +529,7 @@
       <window_info id="UI Designer" order="6" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32827735" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38786566" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.38786566" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39761648" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -658,7 +614,8 @@
     <MESSAGE value="DB'den FileType okuma ve yeni eklenen FileType'ı DB'ye basma özelliği eklendi." />
     <MESSAGE value="Son güncelleme." />
     <MESSAGE value="BFS hariç tamamlandı." />
-    <option name="LAST_COMMIT_MESSAGE" value="BFS hariç tamamlandı." />
+    <MESSAGE value="Finitto Perfecto Italiano !" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finitto Perfecto Italiano !" />
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
@@ -1849,29 +1806,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Model/File.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="489">
-          <caret line="106" column="31" selection-start-line="106" selection-start-column="31" selection-end-line="106" selection-end-column="31" />
+        <state relative-caret-position="255">
+          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
           <folding>
             <element signature="method#File#0;class#File#0" />
             <element signature="method#File#1;class#File#0" />
             <element signature="method#File#2;class#File#0" />
             <element signature="method#File#3;class#File#0" />
-            <element signature="e#2015#2016#0" expanded="true" />
-            <element signature="e#2050#2051#0" expanded="true" />
-            <element signature="e#2104#2105#0" expanded="true" />
-            <element signature="e#2147#2148#0" expanded="true" />
-            <element signature="e#2188#2189#0" expanded="true" />
-            <element signature="e#2227#2228#0" expanded="true" />
-            <element signature="e#2289#2290#0" expanded="true" />
-            <element signature="e#2340#2341#0" expanded="true" />
-            <element signature="e#2371#2372#0" expanded="true" />
-            <element signature="e#2398#2399#0" expanded="true" />
-            <element signature="e#2438#2439#0" expanded="true" />
-            <element signature="e#2465#2466#0" expanded="true" />
-            <element signature="e#2527#2528#0" expanded="true" />
-            <element signature="e#2571#2572#0" expanded="true" />
-            <element signature="e#2602#2603#0" expanded="true" />
             <element signature="method#createUndoFavButton#0;class#File#0" />
+            <element signature="e#2270#2549#0" />
+            <element signature="e#2297#2453#0" />
+            <element signature="e#2487#2539#0" />
           </folding>
         </state>
       </provider>
