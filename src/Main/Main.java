@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import static Classes.Constants.*;
 
 public class Main extends Application {
 
@@ -23,15 +24,15 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception{
         primaryStage = stage;
-        Parent root = FXMLLoader.load(getClass().getResource("Design.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource(DESIGN_FILE));
         primaryStage.initStyle(StageStyle.UNDECORATED);
         root.setOnMousePressed(event -> { xOffset = event.getSceneX(); yOffset = event.getSceneY(); });
         root.setOnMouseDragged(event -> { primaryStage.setX(event.getScreenX() - xOffset); primaryStage.setY(event.getScreenY() - yOffset); });
 
         Scene myScene  = new Scene(root);
-        myScene.getStylesheets().add("styles/dark-theme.css");
-        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("/resources/desktop-icon.png")));
-        primaryStage.setTitle("Office Handler");
+        myScene.getStylesheets().add(STYLE_SHEET_PATH);
+        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream(PROGRAM_ICON)));
+        primaryStage.setTitle(PROGRAM_NAME);
         primaryStage.setScene(myScene);
         primaryStage.show();
 

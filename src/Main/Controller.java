@@ -18,6 +18,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
@@ -40,7 +41,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import static Classes.Constants.*;
 
 /**
@@ -50,13 +50,15 @@ import static Classes.Constants.*;
 
 public class Controller implements Initializable {
 
+    private static boolean ALGORITHM = BFS;
     private static boolean MAXIMIZED = false;
+    private static boolean IS_TABLE_FILTERED = false;
+
     private static double PREVIOUS_HEIGHT;
     private static double PREVIOUS_WIDTH;
-    public static String FIRST_COLOR = "#2D2D2D";
-    public static String SECOND_COLOR = "#FFFF8D";
-    public static String FIRST_TEXT_COLOR = "#B2B2B2";
-    private static boolean ALGORITHM = BFS;
+    public static String CURRENT_FIRST_COLOR = DEFAULT_FIRST_COLOR;
+    public static String CURRENT_SECOND_COLOR = DEFAULT_SECOND_COLOR;
+    public static String CURRENT_FIRST_TEXT_COLOR = DEFAULT_FIRST_TEXT_COLOR;
 
     @FXML
     public ComboBox<String> driveComboBox;
@@ -73,6 +75,8 @@ public class Controller implements Initializable {
     public Label filesDoneLabel;
     public Label totalFilesNumber;
     public Label filesDoneNumber;
+    public ImageView matchCaseTooltip;
+    public ImageView algorithmTooltip;
     public TableView<Model.File> pdfTable = new TableView<>();
     public TableView<Model.File> docTable = new TableView<>();
     public TableView<Model.File> pptTable = new TableView<>();
@@ -85,7 +89,6 @@ public class Controller implements Initializable {
     public ProgressIndicator scanTablesLoading = new ProgressIndicator();
     public ProgressIndicator analyzeLoading = new ProgressIndicator();
     public ProgressBar progressBar = new ProgressBar();
-
 
     public ProgressBarManager pbm = new ProgressBarManager(0.0, 0.0, 0.0, 0.0);
     private HashMap<String, FileType> fileTypes = new HashMap<>();
@@ -111,9 +114,11 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources){
         try {
             matchCaseCheck.setDisable(true);
-            keywordText.textProperty().addListener((observable, oldValue, newValue) -> matchCaseCheck.setDisable(newValue.equals("")));
-            algorithmComboBox.getItems().addAll("DFS", "BFS");
-            algorithmComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> ALGORITHM = newValue.equals("DFS") ? DFS : BFS);
+            Tooltip.install(matchCaseTooltip, MATCH_CASE_TOOLTIP);
+            Tooltip.install(algorithmTooltip, ALGORITHM_TOOLTIP);
+            keywordText.textProperty().addListener((observable, oldValue, newValue) -> {matchCaseCheck.setDisable(newValue.equals("")); if(newValue.equals("")) matchCaseTooltip.setVisible(true); else matchCaseTooltip.setVisible(false);});
+            algorithmComboBox.getItems().addAll(DFS_TEXT, BFS_TEXT);
+            algorithmComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> ALGORITHM = newValue.equals(DFS_TEXT) ? DFS : BFS);
             ScanAndSetDrives();
             SetFileTypes();
             InitializeTables();
@@ -123,16 +128,13 @@ public class Controller implements Initializable {
             indicator.setVisible(false);
             innerGridPane.add(indicator,3,11);
             progressBar.progressProperty().bind(pbm.progressProperty());
-            pbm.totalWorkLoadProperty().addListener(e -> Platform.runLater(() -> totalFilesNumber.setText(String.format("%,.0f", pbm.getTotalWorkLoad()))));
-            pbm.workFinishedProperty().addListener(e -> Platform.runLater(() -> {filesDoneNumber.setText(String.format("%,.0f",pbm.getWorkFinished())); indicator.setText(pbm.getProgressText());}));
+            pbm.totalWorkLoadProperty().addListener(e -> Platform.runLater(() -> totalFilesNumber.setText(String.format(NUMBER_WITH_COMMA_PATTERN, pbm.getTotalWorkLoad()))));
+            pbm.workFinishedProperty().addListener(e -> Platform.runLater(() -> {filesDoneNumber.setText(String.format(NUMBER_WITH_COMMA_PATTERN,pbm.getWorkFinished())); indicator.setText(pbm.getProgressText());}));
             threadPoolFinishedListener.addListener((observable, oldValue, newValue) -> {
                 if(newValue.intValue() == searches.size()){
                     if(DFSstartTime != 0){
                         DFSworkTime = DFSendTime - DFSstartTime;
-                        totalFilesLabel.setVisible(true);
-                        totalFilesLabel.setText("DFS Duration: ");
-                        totalFilesNumber.setVisible(true);
-                        totalFilesNumber.setText(String.format("%02d:%02d:%02d",((DFSworkTime/1000)/60)/60,(DFSworkTime/1000)/60,(DFSworkTime/1000)%60));
+                        totalFilesNumber.setText(String.format(DISPLAY_TIME_PATTERN,((DFSworkTime/1000)/60)/60,(DFSworkTime/1000)/60,(DFSworkTime/1000)%60));
                         if(threadPoolFinishedListenerBFS.intValue() == searchesBFS.size()){
                             ResetAnalyzeInfo();
                             pbm.setProgress(0);
@@ -144,30 +146,34 @@ public class Controller implements Initializable {
                         }
                         DFSstartTime = 0;
                     }else{
-                        new CustomizedDialog("Office Handler", "Scan is completed successfully !", "/resources/desktop-icon.png", Main.getPrimaryStage(), true);
+                        new CustomizedDialog(PROGRAM_NAME, SCAN_IS_DONE_TEXT, PROGRAM_ICON, Main.getPrimaryStage(), true);
                         resetProgressBar(false);
                         threadPoolFinishedListener.set(0);
                     }
                 }
             });
             threadPoolFinishedListenerBFS.addListener((observable, oldValue, newValue) -> {
-                if(BFSstartTime != 0 && newValue.intValue() == searchesBFS.size()){
-                    BFSworkTime = BFSendTime - BFSstartTime;
-                    filesDoneLabel.setVisible(true);
-                    filesDoneLabel.setText("BFS Duration: ");
-                    filesDoneNumber.setVisible(true);
-                    filesDoneNumber.setText(String.format("%02d:%02d:%02d",((BFSworkTime/1000)/60)/60,(BFSworkTime/1000)/60,(BFSworkTime/1000)%60));
-                    if(threadPoolFinishedListener.intValue() == searchesBFS.size()){
-                        ResetAnalyzeInfo();
-                        pbm.setProgress(0);
-                        BFSstartTime = 0;
+                if(newValue.intValue() == searchesBFS.size()){
+                    if(BFSstartTime != 0){
+                        BFSworkTime = BFSendTime - BFSstartTime;
+                        filesDoneNumber.setText(String.format(DISPLAY_TIME_PATTERN,((BFSworkTime/1000)/60)/60,(BFSworkTime/1000)/60,(BFSworkTime/1000)%60));
+                        if(threadPoolFinishedListener.intValue() == searchesBFS.size()){
+                            ResetAnalyzeInfo();
+                            pbm.setProgress(0);
+                            BFSstartTime = 0;
+                            threadPoolFinishedListenerBFS.set(0);
+                            scanTablesButton.setDisable(false);
+                            scanDrivesButton.setDisable(false);
+                            analyzeButton.setDisable(false);
+                            analyzeLoading.setVisible(false);
+                        }
+                    }else{
+                        new CustomizedDialog(PROGRAM_NAME, SCAN_IS_DONE_TEXT, PROGRAM_ICON, Main.getPrimaryStage(), true);
+                        resetProgressBar(false);
                         threadPoolFinishedListenerBFS.set(0);
-                        scanTablesButton.setDisable(false);
-                        scanDrivesButton.setDisable(false);
-                        analyzeButton.setDisable(false);
-                        analyzeLoading.setVisible(false);
                     }
                 }
+
             });
         } catch (SQLException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
@@ -249,8 +255,9 @@ public class Controller implements Initializable {
                 pbm.setWorkFinished(pbm.getWorkFinished()+1);
                 pbm.setProgress(pbm.getWorkFinished()/pbm.getTotalWorkLoad());
             }
-            new CustomizedDialog("Office Handler", "Scan is completed successfully !", "/resources/desktop-icon.png", Main.getPrimaryStage(), false);
+            new CustomizedDialog(PROGRAM_NAME, SCAN_IS_DONE_TEXT, PROGRAM_ICON, Main.getPrimaryStage(), false);
             resetProgressBar(true);
+            IS_TABLE_FILTERED = true;
         }
 
         if(driveComboBox.getSelectionModel().getSelectedItem() != null && driveComboBox.getSelectionModel().getSelectedItem().length() > 3)
@@ -258,7 +265,11 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void scanDrives(){
+    private void scanDrives() throws InvocationTargetException, SQLException, InstantiationException, NoSuchMethodException, IllegalAccessException {
+        if(IS_TABLE_FILTERED){
+            IS_TABLE_FILTERED = false;
+            scanTables();
+        }
         searches = new ArrayList<>();
         ArrayList<FileCount> fileCounts = new ArrayList<>();
 
@@ -277,10 +288,8 @@ public class Controller implements Initializable {
         ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(searches.size());
         for(int i=0; i<searches.size(); i++){
             new Thread(fileCounts.get(i)).start();
-            threadPool.schedule(searches.get(i),20, TimeUnit.SECONDS);
+            threadPool.schedule(searches.get(i),40, TimeUnit.SECONDS);
         }
-
-        clearFilters();
     }
 
     @FXML
@@ -319,21 +328,29 @@ public class Controller implements Initializable {
         DFSstartTime = System.currentTimeMillis();
         for(FileSystemSearch filteredDFSSearch : searches)
             new Thread(filteredDFSSearch).start();
+        totalFilesLabel.setVisible(true);
+        totalFilesLabel.setText(DFS_DURATION_TEXT);
+        totalFilesNumber.setVisible(true);
+        totalFilesNumber.setText(WAITING_FOR_RESULTS_TEXT);
 
         BFSstartTime = System.currentTimeMillis();
         for(FileSystemSearch filteredBFSSearch : searchesBFS)
             new Thread(filteredBFSSearch).start();
+        filesDoneLabel.setVisible(true);
+        filesDoneLabel.setText(BFS_DURATION_TEXT);
+        filesDoneNumber.setVisible(true);
+        filesDoneNumber.setText(WAITING_FOR_RESULTS_TEXT);
     }
 
     @FXML
     private void colorSettings(MouseEvent event){
-        ColorPickerDialog colorSettings = new ColorPickerDialog(event, FIRST_COLOR, SECOND_COLOR, FIRST_TEXT_COLOR);
+        ColorPickerDialog colorSettings = new ColorPickerDialog(event, CURRENT_FIRST_COLOR, CURRENT_SECOND_COLOR, CURRENT_FIRST_TEXT_COLOR);
         if(colorSettings.getBackgroundColorHex()!=null && colorSettings.getBorderColorHex()!=null && colorSettings.getTextColorHex()!=null){
             Parent primaryStageRoot = Main.getPrimaryStage().getScene().getRoot();
-            FIRST_COLOR = colorSettings.getBackgroundColorHex();
-            SECOND_COLOR = colorSettings.getBorderColorHex();
-            FIRST_TEXT_COLOR = colorSettings.getTextColorHex();
-            primaryStageRoot.setStyle("-fx-first: " + FIRST_COLOR + ";" + "-fx-second: " + SECOND_COLOR + ";" + "-fx-first-text: " + FIRST_TEXT_COLOR + ";");
+            CURRENT_FIRST_COLOR = colorSettings.getBackgroundColorHex();
+            CURRENT_SECOND_COLOR = colorSettings.getBorderColorHex();
+            CURRENT_FIRST_TEXT_COLOR = colorSettings.getTextColorHex();
+            primaryStageRoot.setStyle("-fx-first: " + CURRENT_FIRST_COLOR + ";" + "-fx-second: " + CURRENT_SECOND_COLOR + ";" + "-fx-first-text: " + CURRENT_FIRST_TEXT_COLOR + ";");
         }
     }
 
@@ -347,32 +364,40 @@ public class Controller implements Initializable {
         if(selectedFile != null){
             if(selectedFile.getFav()== 0){
                 selectedFile.setFav(1);
-                if(!Database.Update(selectedFile)){
-                    System.out.println("The file you tried to update does not exist in DB !");
+                if(Database.Update(selectedFile)){
                     selectedFile.createUndoFavButton();
                     favTable.getItems().add(selectedFile);
-                    new CustomizedDialog("Office Handler", "Selected file is added to the Favorites !", "/resources/confirmbox.png", Main.getPrimaryStage(), false);
-                } else
+                    new CustomizedDialog(PROGRAM_NAME, ADD_FAV_TEXT, CONFIRM_BOX_ICON, Main.getPrimaryStage(), false);
+                } else{
+                    System.out.println(LOG_UPDATE_FILE_DOES_NOT_EXIST_TEXT);
                     selectedFile.setFav(0);
+                }
             }
             else
-                new CustomizedDialog("Office Handler", "You can not add a file which has already exist in the Favorites !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+                new CustomizedDialog(PROGRAM_NAME, CANT_ADD_FAV_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
         }else
-            new CustomizedDialog("Office Handler", "Please select a file to add to Favorites !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+            new CustomizedDialog(PROGRAM_NAME, SELECT_FAV_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
     }
 
     @FXML
-    private void clearFiltersLoadAgain() throws IllegalAccessException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
+    private void clearFilters() throws IllegalAccessException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
         if(pbm.getProgress()==0.0){
-            clearFilters();
-            if(!scanDrivesButton.isDisabled())
+            if(driveComboBox.getSelectionModel().getSelectedItem() != null && driveComboBox.getSelectionModel().getSelectedItem().length() > 3)
+                driveComboBox.getItems().remove(driveComboBox.getSelectionModel().getSelectedItem());
+            driveComboBox.getSelectionModel().clearSelection();
+            fileTypeComboBox.getSelectionModel().clearSelection();
+            keywordText.setText("");
+            matchCaseCheck.setSelected(false);
+            if(IS_TABLE_FILTERED){
                 scanTables();
+                IS_TABLE_FILTERED = false;
+            }
         }
     }
 
     @FXML
     private void displayHelpDialog() {
-        new CustomizedDialog("Office Handler", "This program was created in the scope of term project of Yildiz Technical University Computer Engineering Department. All rights are reserved by YTU CE. Mustafa ULUKAYA | Onur AY | 2019®", "/resources/desktop-icon.png", Main.getPrimaryStage(), false);
+        new CustomizedDialog(PROGRAM_NAME, HELP_DIALOG_TEXT, PROGRAM_ICON, Main.getPrimaryStage(), false);
     }
 
     private void getFilters(){
@@ -381,26 +406,17 @@ public class Controller implements Initializable {
         directoriesFilter = new ArrayList<>();
         matchCaseFilter = matchCaseCheck.isSelected() ? 1 : 0;
 
-        if(driveComboBox.getSelectionModel().getSelectedItem() == null || driveComboBox.getSelectionModel().getSelectedItem().equals("All"))
+        if(driveComboBox.getSelectionModel().getSelectedItem() == null || driveComboBox.getSelectionModel().getSelectedItem().equals(ITEM_ALL_TEXT))
             for(String drive : drives.values())
                 directoriesFilter.add(new File(drive));
         else
             directoriesFilter.add(new File(driveComboBox.getSelectionModel().getSelectedItem()));
 
-        if(fileTypeComboBox.getSelectionModel().getSelectedItem() == null || fileTypeComboBox.getSelectionModel().getSelectedItem().equals("All"))
+        if(fileTypeComboBox.getSelectionModel().getSelectedItem() == null || fileTypeComboBox.getSelectionModel().getSelectedItem().equals(ITEM_ALL_TEXT))
             for(FileType fileType : fileTypes.values())
                 extensionsFilter.add(fileType.getName());
         else
             extensionsFilter.add(fileTypeComboBox.getSelectionModel().getSelectedItem());
-    }
-
-    private void clearFilters() {
-        if(driveComboBox.getSelectionModel().getSelectedItem() != null && driveComboBox.getSelectionModel().getSelectedItem().length() > 3)
-            driveComboBox.getItems().remove(driveComboBox.getSelectionModel().getSelectedItem());
-        driveComboBox.getSelectionModel().clearSelection();
-        fileTypeComboBox.getSelectionModel().clearSelection();
-        keywordText.setText("");
-        matchCaseCheck.setSelected(false);
     }
 
     private void LoadDataFromDB() throws SQLException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -412,15 +428,15 @@ public class Controller implements Initializable {
 
     private void SetFileTypes() throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         ObservableList<Model.FileType> result = Database.Select(new FileType(), null);
-        fileTypeComboBox.getItems().add("All");
+        fileTypeComboBox.getItems().add(ITEM_ALL_TEXT);
         if(result != null){
             for(FileType fileType : result){
                 fileTypes.put(fileType.getName(), fileType);
                 fileTypeComboBox.getItems().add(fileTypes.get(fileType.getName()).getName());
             }
         }
-        fileTypeComboBox.getItems().add("Add new file type...");
-        fileTypeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> { if(newValue != null && newValue.equals("Add new file type...")) {
+        fileTypeComboBox.getItems().add(ADD_NEW_FILE_TYPE_TEXT);
+        fileTypeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> { if(newValue != null && newValue.equals(ADD_NEW_FILE_TYPE_TEXT)) {
             try {
                 if(!addNewFileType())
                     Platform.runLater(() -> fileTypeComboBox.getSelectionModel().clearSelection());
@@ -440,7 +456,7 @@ public class Controller implements Initializable {
         Date lastModifiedDate;
         String fileType;
         Double size;
-        DateFormat creationDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat creationDateFormat = new SimpleDateFormat(DATE_PATTERN);
         BasicFileAttributes attributes;
         for(String fileName : fileNames){
             scannedFile = new File(fileName);
@@ -465,18 +481,18 @@ public class Controller implements Initializable {
     }
 
     private boolean addNewFileType() throws IllegalAccessException {
-        CustomizedDialog addNewFileTypeDialog = new CustomizedDialog("New File Type", "Please write the file type without comma before it. (Ex.: exe, txt etc.)", "/resources/desktop-icon.png", "File Type:", Main.getPrimaryStage(), true);
+        CustomizedDialog addNewFileTypeDialog = new CustomizedDialog(NEW_FILE_TYPE_TEXT, FILE_TYPE_DESCRIPTION_TEXT, PROGRAM_ICON, NEW_FILE_TYPE_TEXT+":", Main.getPrimaryStage(), true);
         String result = addNewFileTypeDialog.getResult();
         if(result != null){
             if(result.isEmpty()){
-                new CustomizedDialog("New File Type", "You can not add an empty file type !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+                new CustomizedDialog(NEW_FILE_TYPE_TEXT, EMPTY_FILE_TYPE_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
                 return false;
             }
             else {
                 FileType newFileType = new FileType(result.toLowerCase());
                 newFileType.setDefault(0);
                 if (!Database.Insert(newFileType)) {
-                    new CustomizedDialog("New File Type", "You can not add a file type which has already exists in the list !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+                    new CustomizedDialog(NEW_FILE_TYPE_TEXT, EXISTING_FILE_TYPE_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
                     return false;
                 }
                 fileTypeComboBox.getItems().add(fileTypeComboBox.getItems().size() - 1, newFileType.getName());
@@ -503,7 +519,7 @@ public class Controller implements Initializable {
                 driveComboBox.getSelectionModel().select(selectedDirectory.getAbsolutePath());
                 return true;
             } else{
-                new CustomizedDialog("Select Specific Directory...", "You can not add an existing directory !", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+                new CustomizedDialog(SELECT_SPECIFIC_DIRECTORY_TEXT, EXISTING_DIRECTORY_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
                 return false;
             }
         } else
@@ -571,7 +587,7 @@ public class Controller implements Initializable {
                 drives.put(path.toString().replaceAll("[/:]", "").replace("\\", ""), path.toString());
             }
 
-        driveComboBox.getItems().add("Select specific directory...");
+        driveComboBox.getItems().add(SELECT_SPECIFIC_DIRECTORY_TEXT);
         driveComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && newValue.equals(driveComboBox.getItems().get(driveComboBox.getItems().size() - 1)))
                 if(!Controller.this.selectSpecificDirectory(Main.getPrimaryStage()))
@@ -627,9 +643,9 @@ public class Controller implements Initializable {
                                 Desktop.getDesktop().open(openFile);
                             else{
                                 if(!Database.Delete(selectedFile))
-                                    System.out.println("The file you tried to delete does not exist in DB !");
+                                    System.out.println(FILE_DOES_NOT_EXISTS_IN_DB_TEXT);
                                 tables.get(selectedFile.getFileType()).getItems().remove(selectedFile);
-                                new CustomizedDialog("Office Handler", "File not found. The file you are trying to open may be deleted or moved.", "/resources/alertbox.png", Main.getPrimaryStage(), false);
+                                new CustomizedDialog(PROGRAM_NAME, FILE_NOT_FOUND_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
                             }
                         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
                             e.printStackTrace();
@@ -653,14 +669,18 @@ public class Controller implements Initializable {
     }
 
     private void ResetAnalyzeInfo(){
-        new CustomizedDialog("Office Handler", "Analyze is finished, results are on the left of screen !", "/resources/confirmbox.png", Main.getPrimaryStage(), true);
+        new CustomizedDialog(PROGRAM_NAME, ANALYZE_FINISH_TEXT, CONFIRM_BOX_ICON, Main.getPrimaryStage(), true);
+        if(DFSworkTime<BFSworkTime)
+            algorithmComboBox.setValue(DFS_TEXT);
+        else
+            algorithmComboBox.setValue(BFS_TEXT);
         filesDoneLabel.setVisible(false);
         filesDoneNumber.setVisible(false);
         totalFilesLabel.setVisible(false);
         totalFilesNumber.setVisible(false);
-        totalFilesLabel.setText("Total Files: ");
+        totalFilesLabel.setText(TOTAL_FILES_TEXT);
         totalFilesNumber.setText("");
-        filesDoneLabel.setText("Files Done: ");
+        filesDoneLabel.setText(FILES_DONE_TEXT);
         filesDoneNumber.setText("");
     }
 }

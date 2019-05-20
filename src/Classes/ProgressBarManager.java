@@ -4,6 +4,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import static Classes.Constants.*;
 
 public class ProgressBarManager {
 
@@ -46,7 +47,7 @@ public class ProgressBarManager {
 
     public void setProgress(double progress) {
         this.progress.set(progress);
-        setProgressText(String.format("%.2f%%",progress*100));
+        setProgressText(String.format(PROGRESS_TEXT_PATTERN,progress*100));
     }
 
     public String getProgressText() {
@@ -61,6 +62,6 @@ public class ProgressBarManager {
         this.workFinished.set(workFinished);
         this.totalWorkLoad.set(totalWorkLoad);
         this.progress.set(progress);
-        this.progressText.set(String.format("%%%.0f",progressText));
+        this.progressText.set(String.format(PROGRESS_INDICATOR_PATTERN,progressText));
     }
 }

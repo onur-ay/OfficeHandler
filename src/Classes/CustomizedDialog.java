@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import static Classes.Constants.*;
 
 public class CustomizedDialog {
 
@@ -90,7 +91,7 @@ public class CustomizedDialog {
         setTitleBar(getTitleText(), getImageFile());
         setHeader(getHeaderText());
 
-        confirmButton = new Button("OK");
+        confirmButton = new Button(OK_BUTTON_TEXT);
         confirmButton.setOnAction(e -> dialog.close());
 
         initializeLayout();
@@ -111,7 +112,7 @@ public class CustomizedDialog {
         setHeader(headerText);
         setInputField(getContentText());
 
-        confirmButton = new Button("OK");
+        confirmButton = new Button(OK_BUTTON_TEXT);
         confirmButton.setOnAction(e -> {setResult(input.getText()); dialog.close();});
 
         initializeLayout();
@@ -126,7 +127,7 @@ public class CustomizedDialog {
         Rectangle2D window = activeScreen.getBounds();
 
         Scene scene = new Scene(layout);
-        scene.getStylesheets().add("/styles/dark-theme.css");
+        scene.getStylesheets().add(STYLE_SHEET_PATH);
         dialog.setScene(scene);
         if(wait){
             dialog.setX(window.getMinX() + (window.getWidth() - 437)/2);
@@ -145,16 +146,15 @@ public class CustomizedDialog {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initStyle(StageStyle.UNDECORATED);
         dialog.setMinWidth(250);
-        dialog.setMaxWidth(450);
+        dialog.setMaxWidth(650);
         dialog.setMinHeight(50);
-        dialog.setMaxHeight(200);
         dialog.setResizable(false);
     }
 
     private void initializeLayout(){
         layout = new VBox(10);
         layout.setAlignment(Pos.CENTER);
-        layout.setStyle("-fx-border-color: " + Controller.SECOND_COLOR +"; -fx-background-color: " + Controller.FIRST_COLOR +";");
+        layout.setStyle("-fx-border-color: " + Controller.CURRENT_SECOND_COLOR +"; -fx-background-color: " + Controller.CURRENT_FIRST_COLOR +";");
         layout.setPadding(new Insets(5,5,5,5));
     }
 
@@ -182,9 +182,8 @@ public class CustomizedDialog {
         this.header = new Label();
         this.header.setText(headerText);
         this.header.setMinWidth(225);
-        this.header.setMaxWidth(425);
+        this.header.setMaxWidth(625);
         this.header.setMinHeight(25);
-        this.header.setMaxHeight(175);
         this.header.setWrapText(true);
         this.header.setAlignment(Pos.CENTER);
         this.header.setTextAlignment(TextAlignment.CENTER);

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import static Classes.Constants.*;
 
 public class FileSystemSearch extends Task {
     private File entryDirectory;
@@ -67,11 +68,11 @@ public class FileSystemSearch extends Task {
                         }
                     }
                 } else
-                    System.out.println(currentDirectory.getAbsoluteFile() + " is an empty directory!");
+                    System.out.println(currentDirectory.getAbsoluteFile() + LOG_EMPTY_DIRECTORY_TEXT);
             } else
-                System.out.println(currentDirectory.getAbsoluteFile() + " is not a readable directory!");
+                System.out.println(currentDirectory.getAbsoluteFile() + LOG_NOT_READABLE_DIRECTORY_TEXT);
         } else
-            System.out.println(currentDirectory.getAbsoluteFile() + " is not a appropriate directory!");
+            System.out.println(currentDirectory.getAbsoluteFile() + LOG_NOT_APPROPRIATE_DIRECTORY_TEXT);
     }
 
     private void searchWithBFS() throws IOException {
@@ -95,11 +96,11 @@ public class FileSystemSearch extends Task {
                             }
                         }
                     } else
-                        System.out.println(currentDirectory.getAbsoluteFile() + " is an empty directory!");
+                        System.out.println(currentDirectory.getAbsoluteFile() + LOG_EMPTY_DIRECTORY_TEXT);
                 } else
-                    System.out.println(currentDirectory.getAbsoluteFile() + " is not a readable directory!");
+                    System.out.println(currentDirectory.getAbsoluteFile() + LOG_NOT_READABLE_DIRECTORY_TEXT);
             } else
-                System.out.println(currentDirectory.getAbsoluteFile() + " is not a appropriate directory!");
+                System.out.println(currentDirectory.getAbsoluteFile() + LOG_NOT_APPROPRIATE_DIRECTORY_TEXT);
         }
     }
 
