@@ -503,7 +503,7 @@
 .tab-pane .tab-header-area .tab-header-background{
     -fx-border-radius: 20px;
     -fx-background-radius: 20px;
-    -fx-border-color: -fx-second;
+    -fx-border-color: transparent;
     -fx-background-color: -fx-first;
     -fx-background-insets: 5.0 3.0 0.0 5.0;
     -fx-border-insets: 5.0 3.0 0.0 5.0;

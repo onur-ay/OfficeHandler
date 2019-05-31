@@ -50,6 +50,7 @@ import static Classes.Constants.*;
 
 public class Controller implements Initializable {
 
+    public static final int START_AFTER_SECOND = 10;
     private static boolean ALGORITHM = BFS;
     private static boolean MAXIMIZED = false;
     private static boolean IS_TABLE_FILTERED = false;
@@ -288,7 +289,7 @@ public class Controller implements Initializable {
         ScheduledThreadPoolExecutor threadPool = new ScheduledThreadPoolExecutor(searches.size());
         for(int i=0; i<searches.size(); i++){
             new Thread(fileCounts.get(i)).start();
-            threadPool.schedule(searches.get(i),40, TimeUnit.SECONDS);
+            threadPool.schedule(searches.get(i), START_AFTER_SECOND, TimeUnit.SECONDS);
         }
     }
 
@@ -468,7 +469,9 @@ public class Controller implements Initializable {
             author = Files.getOwner(directory).toString().replace('\\','/');
             lastModifiedDate = new Date(creationDateFormat.parse(creationDateFormat.format(Files.getLastModifiedTime(directory).toMillis())));
             scannedFileModel = new Model.File(fileName.substring(fileName.lastIndexOf('/')+1,fileName.lastIndexOf('.')), fileType, author, directory, creationDate, lastModifiedDate, size, 0);
-            if(Database.Insert(scannedFileModel)){
+            Integer fileID = Database.Insert(scannedFileModel);
+            if(fileID > -1){
+                scannedFileModel.setID(fileID);
                 fileType = fileType.toLowerCase();
                 if(fileType.contains("pdf") || fileType.contains("xls") || fileType.contains("ppt") || fileType.contains("doc")){
                     if(fileType.equals("xlsx") || fileType.equals("pptx") || fileType.equals("docx"))
@@ -491,7 +494,8 @@ public class Controller implements Initializable {
             else {
                 FileType newFileType = new FileType(result.toLowerCase());
                 newFileType.setDefault(0);
-                if (!Database.Insert(newFileType)) {
+                Integer fileTypeID = Database.Insert(newFileType);
+                if (fileTypeID == -1) {
                     new CustomizedDialog(NEW_FILE_TYPE_TEXT, EXISTING_FILE_TYPE_TEXT, ALERT_BOX_ICON, Main.getPrimaryStage(), false);
                     return false;
                 }

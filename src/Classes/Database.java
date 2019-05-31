@@ -16,7 +16,7 @@ public class Database {
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "Sher76796775ed.";
 
-    public static <T> boolean Insert(T Model) throws IllegalAccessException {
+    public static <T> Integer Insert(T Model) throws IllegalAccessException {
         StringBuilder sqlQuery = new StringBuilder("INSERT INTO \"OFFICE\".\"" + Model.getClass().getName().substring(Model.getClass().getName().lastIndexOf('.')+1) + "\"(\"");
         Field[] fields = Model.getClass().getDeclaredFields();
 
@@ -42,9 +42,9 @@ public class Database {
             }
         }
         sqlQuery.deleteCharAt(sqlQuery.length()-1);
-        sqlQuery.append(");");
+        sqlQuery.append(") RETURNING \"ID\";");
 
-        return executeUpdate(sqlQuery);
+        return executeInsert(sqlQuery);
     }
 
     /*public static <T> boolean Update(T Model, String [][] updatedFields, String[][] conditions){
@@ -157,6 +157,19 @@ public class Database {
                 System.out.println(e.toString());
         }
         return false;
+    }
+
+    private static Integer executeInsert(StringBuilder query){
+        try (Connection connection = connect()) {
+            Statement statement = connection.createStatement();
+            ResultSet rs = statement.executeQuery(query.toString());
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            if(!e.toString().toLowerCase().contains("unique"))
+                System.out.println(e.toString());
+        }
+        return -1;
     }
 
     private static ResultSet executeSelect(StringBuilder query){
